@@ -7,7 +7,7 @@
 #define N 1000000
 
 #define Insert(w) {\
-     s[maxS] = w;  s[w-1] = maxS;  maxS = w; /* Insert w into W; */\
+    s[maxS] = w;  s[w-1] = maxS;  maxS = w; /* Insert w into W; */\
 }
 
 #define Extend(length, n) {\
@@ -50,7 +50,7 @@ int main (int argc, char *argv[]) {
             if (N < temp) temp = N;
             Extend (length, temp); /* Extend W,length to minimum of p*length,N; */
             if (length == N) Insert (N+2); /* sentinel */
-		}
+        }
         Delete (p); 
         /* Insert p into Pr; */
         k++; 
@@ -59,7 +59,7 @@ int main (int argc, char *argv[]) {
     if (length < N) {
         Extend (length, N);
 		Insert (N+2); /* sentinel */
-	}
+    }
     /* print primes */
     printf("N=%d\n",N);
     /*printf("%d\n", 2);*/
