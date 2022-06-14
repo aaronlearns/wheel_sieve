@@ -58,7 +58,7 @@ int main (int argc, char *argv[]) {
     }
     if (length < N) {
         Extend (length, N);
-		Insert (N+2); /* sentinel */
+        Insert (N+2); /* sentinel */
     }
     /* print primes */
     printf("N=%d\n",N);
