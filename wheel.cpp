@@ -1,43 +1,52 @@
 /* Sieve of Pritchard in C++ */
-/* naive, unoptimized version */
+/* original unoptimized version as presented in https://dl.acm.org/doi/10.1145/358527.358540 */
 
+#include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#define N 1000000
+#define N 1000000000
+
+static uint32_t s[N+2]; /* in 1..N+2 */
+uint32_t length, maxS;
+
+#define next(w) s[w]
+
+#define prev(w) s[w-1]
 
 #define Insert(w) {\
-    s[maxS] = w;  s[w-1] = maxS;  maxS = w; /* Insert w into W; */\
+    next(maxS) = w;  prev(w) = maxS;  maxS = w; /* Insert w into W; */\
 }
 
-#define Extend(length, n) {\
-    uint32_t w, x;\
-    w = 1;\
-    x = length+1;\
-    while (x <= n) {\
-        Insert (x);\
-        w = s[w]; /* w := next(W,w); */\
-        x = length + w;\
-    }\
-    length = n;\
+void Extend (uint32_t &length, uint32_t n) {
+    uint32_t w, x;
+    w = 1;
+    x = length+1;
+    while (x <= n) {
+        Insert(x);
+        w = next(w);
+        x = length + w;
+    }
+    length = n;
 }
 
-#define Delete(p) {\
-    uint32_t w, temp1, temp2;\
-    w = p;\
-    while (p*w <= length)\
-        w = s[w]; /* w := next(W,w); */\
-    while (w > 1) {\
-        w = s[w-1]; /* w := prev(W,w); */\
-        temp1 = p*w; temp2 = s[temp1-1]; s[temp2] = s[temp1]; s[s[temp1]-1] = temp2; /* Remove p*w from W; */\
-    }\
+void Delete (uint32_t p) {
+    uint32_t f, pf, temp1, temp2;
+    f = p;
+    while (p*f <= length)\
+        f = next(f);
+    while (f > 1) {
+        f = prev(f);
+        pf = p*f; temp1 = prev(pf); temp2 = next(pf); next(temp1) = temp2; prev(temp2) = temp1; /* Remove p*f from W; */
+    }
 }
 
 int main (int argc, char *argv[]) {
-    static uint32_t s[N+2]; /* in 1..N+2 */
-    uint32_t maxS;
-    uint32_t k, length, p;
+    uint32_t k, p;
     uint32_t nrPrimes;
+    uint32_t temp;
+    bool printPrimes = false;
+    if (argc == 2 && strcmp(argv[1], "-p") == 0) printPrimes = true;
     k = 1;
     maxS = 1; /* W = {1}; */
     length = 2;
@@ -45,29 +54,28 @@ int main (int argc, char *argv[]) {
     nrPrimes = 1; /* Pr = {2}; */
     /* invariant: p = p_(k+1) and W = W_k inter {1,...,N} and length = min(P_k,N) and Pr = the primes up to p_k */
     while (p*p <= N) {
-        if (length < N) {
-            uint32_t temp = p*length;
+         if (length < N) {
+            temp = p*length;
             if (N < temp) temp = N;
             Extend (length, temp); /* Extend W,length to minimum of p*length,N; */
             if (length == N) Insert (N+2); /* sentinel */
         }
-        Delete (p); 
+        Delete(p); 
         /* Insert p into Pr; */
         k++; 
-        p = s[1]; /* p = next(W, 1); */
+        p = next(1); /* p = next(W, 1); */
     }
     if (length < N) {
         Extend (length, N);
         Insert (N+2); /* sentinel */
     }
-    /* print primes */
     printf("N=%d\n",N);
-    /*printf("%d\n", 2);*/
+    if (printPrimes) printf("%d\n", 2);
     p = 3;
     while (p <= N) {
-        /*printf("%d\n", p);*/
+        if (printPrimes) printf("%d\n", p);
         nrPrimes++;
-        p = s[p];
+        p = next(p);
     }
     printf("%d primes found\n", nrPrimes);
 }
